@@ -1,6 +1,7 @@
 package com.sp.student_course_registration_system.services;
 
 import com.sp.student_course_registration_system.daos.dtos.CourseDto;
+import com.sp.student_course_registration_system.daos.requestdaos.CourseRequest;
 
 import java.util.List;
 
@@ -13,10 +14,10 @@ public interface CourseService {
     CourseDto getCourseById(Long courseId);
 
     // Get a single course based on the passed in course title
-    List<CourseDto> getAllCoursesByTitle(String courseTitle);
+    CourseDto getCourseByCourseTitle(String courseTitle);
 
     // Add a new course into the system
-    boolean saveCourse(CourseDto courseDto);
+    boolean saveCourse(CourseRequest courseRequest);
 
     // Update an existing course in the system
     boolean updateCourse(CourseDto courseDto);

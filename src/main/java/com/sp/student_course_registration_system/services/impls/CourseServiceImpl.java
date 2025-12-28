@@ -2,6 +2,7 @@ package com.sp.student_course_registration_system.services.impls;
 
 import com.sp.student_course_registration_system.Utils.ModelMapper;
 import com.sp.student_course_registration_system.daos.dtos.CourseDto;
+import com.sp.student_course_registration_system.daos.requestdaos.CourseRequest;
 import com.sp.student_course_registration_system.models.CourseModel;
 import com.sp.student_course_registration_system.repositories.CourseRepository;
 import com.sp.student_course_registration_system.services.CourseService;
@@ -57,32 +58,26 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseDto> getAllCoursesByTitle(String courseTitle) {
+    public CourseDto getCourseByCourseTitle(String courseTitle) {
 
-        List<CourseDto> courseDtoList = new ArrayList<>();
+        Optional<CourseModel> courseModel = courseRepository.findCourseModelByTitle(courseTitle);
 
-        List<CourseModel> courseModelList = courseRepository.findCourseModelByTitle(courseTitle);
-
-        if (courseModelList.isEmpty()){
-            System.out.println("Currently, there are no courses with the course name: " + courseTitle + " available");
-            return courseDtoList;
+        if (courseModel.isEmpty()){
+            System.out.println("The Course with the course Title:" + courseTitle + " does not exists");
+            return new CourseDto();
         }
 
-        courseModelList.forEach(courseModel -> {
-            courseDtoList.add(modelMapper.conModelToDto(courseModel));
-        });
-
-        return courseDtoList;
+        return modelMapper.conModelToDto(courseModel.get());
     }
 
     @Override
-    public boolean saveCourse(CourseDto courseDto) {
+    public boolean saveCourse(CourseRequest courseRequest) {
 
-        if (courseDto.getTitle().isEmpty() || courseDto.getCapacity() <= 0){
+        if (courseRequest.getTitle().isEmpty() || courseRequest.getCapacity() <= 0){
             System.out.println("A Course should have a Name and a Capacity");
             return false;
         }
-        courseRepository.save(modelMapper.conDtoToModel(courseDto));
+        courseRepository.save(modelMapper.conRequestToModel(courseRequest));
         return true;
     }
 
