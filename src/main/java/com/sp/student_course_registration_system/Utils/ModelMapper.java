@@ -2,6 +2,7 @@ package com.sp.student_course_registration_system.Utils;
 
 import com.sp.student_course_registration_system.daos.dtos.CourseDto;
 import com.sp.student_course_registration_system.daos.dtos.StudentDto;
+import com.sp.student_course_registration_system.daos.requestdaos.CourseRequest;
 import com.sp.student_course_registration_system.daos.requestdaos.StudentRequest;
 import com.sp.student_course_registration_system.models.CourseModel;
 import com.sp.student_course_registration_system.models.StudentModel;
@@ -48,6 +49,12 @@ public class ModelMapper {
         return studentModel;
     }
 
-
+    // Convert CourseRequest into a CourseModel
+    public CourseModel conRequestToModel(CourseRequest courseRequest){
+        CourseModel courseModel = new CourseModel();
+        courseModel.setTitle(courseRequest.getTitle());
+        courseModel.setCapacity(courseRequest.getCapacity());
+        return courseModel;
+    }
 
 }

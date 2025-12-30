@@ -1,5 +1,6 @@
 package com.sp.student_course_registration_system.daos.responsetdaos;
 
+import com.sp.student_course_registration_system.daos.dtos.StudentDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,5 +17,5 @@ public class CourseResponse {
     private Long id;
     private String title;
     private int capacity;
-    private Set<StudentResponse> studentResponseSet = new HashSet<>();
+    private Set<StudentDto> studentResponseSet = new HashSet<>();
 }

@@ -25,15 +25,6 @@ public class CourseModel {
     private String title;
     private int capacity;
 
-    // Here we have to define the Many-To-Many Relationship between Courses and Students
-    // Course class will be the Parent class
-//    @ManyToMany()
-//    @JoinTable(
-//            name = "enrollment",
-//            joinColumns = @JoinColumn(name = "course_model_id"),
-//            inverseJoinColumns = @JoinColumn(name = "student_model_id")
-//    )
-//    private Set<StudentModel> studentModels = new HashSet<>();
     @OneToMany(
             mappedBy = "courseModel",
             cascade = CascadeType.ALL,

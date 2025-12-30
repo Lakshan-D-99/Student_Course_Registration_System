@@ -26,12 +26,6 @@ public class StudentModel {
     @Column(unique = true)
     private String email;
 
-//    // We need to create a relationship between Student and Courses.
-//    // One Student can enroll in many courses and a Course can have multiple Students.
-//    // So it will be a Many-to-Many Relationship between Students and Courses
-//    // Student will be the child class, because a Course can exists even without having any Students
-//    @ManyToMany(mappedBy = "studentModels")
-//    private Set<CourseModel> courseModelSet = new HashSet<>();
     @OneToMany(
             mappedBy = "studentModel",
             cascade = CascadeType.ALL,
