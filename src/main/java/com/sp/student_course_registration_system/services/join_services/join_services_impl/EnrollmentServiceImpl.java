@@ -6,6 +6,10 @@ import com.sp.student_course_registration_system.daos.dtos.StudentDto;
 import com.sp.student_course_registration_system.daos.requestdaos.EnrollmentRequest;
 import com.sp.student_course_registration_system.daos.responsetdaos.EnrollmentCourseResponse;
 import com.sp.student_course_registration_system.daos.responsetdaos.EnrollmentStudentResponse;
+import com.sp.student_course_registration_system.exceptions.courseExps.CourseCapacityException;
+import com.sp.student_course_registration_system.exceptions.courseExps.CourseNotFoundException;
+import com.sp.student_course_registration_system.exceptions.enrollmentExps.StudentCourseException;
+import com.sp.student_course_registration_system.exceptions.studentExps.StudentNotFoundException;
 import com.sp.student_course_registration_system.models.CourseModel;
 import com.sp.student_course_registration_system.models.StudentModel;
 import com.sp.student_course_registration_system.models.join_models.EnrollmentModel;
@@ -18,8 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,7 +58,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         // Find the Student through passed in studentId
         StudentModel studentModel = studentRepository.findById(studentId).orElseThrow(
-                ()-> new EntityNotFoundException("Student with the StudentId: " + studentId + " does not exists"));
+                ()-> new StudentNotFoundException("Student with the StudentId: " + studentId + " does not exists"));
 
 
         // Based on the Student, we can find all the Courses, that this Student is a part of
@@ -81,7 +83,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         // Find the Course through passed in course id
         CourseModel courseModel = courseRepository.findById(courseId).orElseThrow(
-                ()-> new EntityNotFoundException("Course with the CourseId: " + courseId + " does not exists"));
+                ()-> new CourseNotFoundException("Course with the CourseId: " + courseId + " does not exists"));
 
         Set<EnrollmentModel> enrollmentModelSet = enrollmentRepository.findByCourseModel(courseModel);
 
@@ -94,139 +96,60 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 )).collect(Collectors.toSet());
 
         return new EnrollmentCourseResponse(courseModel.getId(),courseModel.getTitle(),studentDtoSet);
-
     }
 
     @Override
     @Transactional
-    public boolean addStudentToCourse(EnrollmentRequest enrollmentRequest) {
+    public void addStudentToCourse(EnrollmentRequest enrollmentRequest) {
 
         if (!checkEnrollmentRequest(enrollmentRequest)){
-            return false;
+            throw new StudentCourseException("Student and a Course is required for enrollment");
         }
 
-        // Check if the Enrolling student exists
-        Optional<StudentModel> studentModel = studentRepository.findById(enrollmentRequest.getStudentId());
+        StudentModel studentModel = studentRepository.findById(enrollmentRequest.getStudentId()).orElseThrow(
+                ()-> new StudentNotFoundException("Student with the StudentId: " + enrollmentRequest.getStudentId() + " does not exists"));
 
-        if (studentModel.isEmpty()){
-            System.out.println("The Student with the StudentId: " + enrollmentRequest.getStudentId() + " does not exists");
-            return false;
-        }
-
-        // Check if the course is available
-        Optional<CourseModel> courseModel = courseRepository.findById(enrollmentRequest.getCourseId());
-
-        if (courseModel.isEmpty()){
-            System.out.println("The Course with the CourseId: " + enrollmentRequest.getCourseId() + " does not exists");
-            return false;
-        }
+        CourseModel courseModel = courseRepository.findById(enrollmentRequest.getCourseId()).orElseThrow(
+                ()-> new CourseNotFoundException("Course with the CourseId: " + enrollmentRequest.getCourseId() + " does not exists"));
 
         // Check if the Course capacity does not exceed
-        if (courseModel.get().getCapacity() == 0){
+        if (courseModel.getCapacity() == 0){
             System.out.println("The Course capacity is at a maximum");
-            return false;
+            throw new CourseCapacityException("The Course capacity is at a maximum");
         }
 
         EnrollmentModel enrollmentModel = new EnrollmentModel();
-        enrollmentModel.setStudentModel(studentModel.get());
-        enrollmentModel.setCourseModel(courseModel.get());
+        enrollmentModel.setStudentModel(studentModel);
+        enrollmentModel.setCourseModel(courseModel);
 
         enrollmentRepository.save(enrollmentModel);
 
-        courseModel.get().setCapacity(courseModel.get().getCapacity() - 1);
+        courseModel.setCapacity(courseModel.getCapacity() - 1);
 
-        courseRepository.save(courseModel.get());
-
-        return true;
+        courseRepository.save(courseModel);
     }
 
     @Override
-    @Transactional
-    public boolean addCourseToStudent(EnrollmentRequest enrollmentRequest) {
+    public void removeStudentFromCourse(EnrollmentRequest enrollmentRequest) {
 
-        if (!checkEnrollmentRequest(enrollmentRequest)){
-            return false;
+        if (!checkEnrollmentRequest(enrollmentRequest)) {
+            throw new StudentCourseException("Student and a Course is required to perform this operation");
         }
 
-        // Check if the Enrolling student exists
-        Optional<StudentModel> studentModel = studentRepository.findById(enrollmentRequest.getStudentId());
+        StudentModel studentModel = studentRepository.findById(enrollmentRequest.getStudentId()).orElseThrow(
+                ()-> new StudentNotFoundException("Student with the StudentId: " + enrollmentRequest.getStudentId() + " does not exists"));
 
-        if (studentModel.isEmpty()){
-            System.out.println("The Student with the StudentId: " + enrollmentRequest.getStudentId() + " does not exists");
-            return false;
-        }
-
-        // Check if the course is available
-        Optional<CourseModel> courseModel = courseRepository.findById(enrollmentRequest.getCourseId());
-
-        if (courseModel.isEmpty()){
-            System.out.println("The Course with the CourseId: " + enrollmentRequest.getCourseId() + " does not exists");
-            return false;
-        }
-
-        // Check if the Course capacity does not exceed
-        if (courseModel.get().getCapacity() == 0){
-            System.out.println("The Course capacity is at a maximum");
-            return false;
-        }
-
-        EnrollmentModel enrollmentModel = new EnrollmentModel();
-        enrollmentModel.setStudentModel(studentModel.get());
-        enrollmentModel.setCourseModel(courseModel.get());
-
-        enrollmentRepository.save(enrollmentModel);
-
-        courseModel.get().setCapacity(courseModel.get().getCapacity() - 1);
-
-        courseRepository.save(courseModel.get());
-
-        return true;
-    }
-
-    @Override
-    public boolean removeStudentFromCourse(EnrollmentRequest enrollmentRequest) {
-
-        if (!checkEnrollmentRequest(enrollmentRequest)){
-            return false;
-        }
-
-        // Check if the Enrolling student exists
-        Optional<StudentModel> studentModel = studentRepository.findById(enrollmentRequest.getStudentId());
-
-        if (studentModel.isEmpty()){
-            System.out.println("The Student with the StudentId: " + enrollmentRequest.getStudentId() + " does not exists");
-            return false;
-        }
-
-        // Check if the course is available
-        Optional<CourseModel> courseModel = courseRepository.findById(enrollmentRequest.getCourseId());
-
-        if (courseModel.isEmpty()){
-            System.out.println("The Course with the CourseId: " + enrollmentRequest.getCourseId() + " does not exists");
-            return false;
-        }
-
-        // Get the specific EnrollmentModel based on the both student and course id
-        Optional<EnrollmentModel> enrollmentModel = enrollmentRepository.findEnrollmentModelIdByStudentAndCourseId(enrollmentRequest.getCourseId(), enrollmentRequest.getStudentId());
-
-        if (enrollmentModel.isPresent()){
-            enrollmentRepository.delete(enrollmentModel.get());
-
-            courseModel.get().setCapacity(courseModel.get().getCapacity() + 1);
-
-            courseRepository.save(courseModel.get());
-
-            return true;
-        }
-
-        return false;
+        CourseModel courseModel = courseRepository.findById(enrollmentRequest.getCourseId()).orElseThrow(
+                ()-> new CourseNotFoundException("Course with the CourseId: " + enrollmentRequest.getCourseId() + " does not exists"));
 
 
-    }
+        EnrollmentModel enrollmentModel = enrollmentRepository.findEnrollmentModelIdByStudentAndCourseId(courseModel.getId(), studentModel.getId()).orElseThrow(
+                ()-> new StudentCourseException("Error getting Student and Course information"));
 
-    @Override
-    public boolean removeCourseFromStudent(EnrollmentRequest enrollmentRequest) {
-        return false;
+        courseModel.removeEnrollment(enrollmentModel);
+        courseModel.setCapacity(courseModel.getCapacity() + 1);
+        courseRepository.save(courseModel);
+
     }
 
 

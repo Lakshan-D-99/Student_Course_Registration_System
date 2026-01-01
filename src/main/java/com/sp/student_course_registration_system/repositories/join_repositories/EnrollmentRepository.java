@@ -7,6 +7,7 @@ import com.sp.student_course_registration_system.models.StudentModel;
 import com.sp.student_course_registration_system.models.join_models.EnrollmentModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,11 +17,8 @@ import java.util.Set;
 @Repository
 public interface EnrollmentRepository extends JpaRepository<EnrollmentModel,Long> {
 
-    @Query(
-            value = "SELECT e FROM EnrollmentModel e WHERE e.studentModel.id=?1 AND e.courseModel.id=?2"
-
-    )
-    Optional<EnrollmentModel> findEnrollmentModelIdByStudentAndCourseId(Long courseId, Long studentId);
+    @Query("SELECT e FROM EnrollmentModel e WHERE e.studentModel.id=:courseId AND e.courseModel.id=:studentId")
+    Optional<EnrollmentModel> findEnrollmentModelIdByStudentAndCourseId(@Param("courseId") Long courseId,@Param("studentId") Long studentId);
 
     Set<EnrollmentModel> findByStudentModel(StudentModel studentModel);
 

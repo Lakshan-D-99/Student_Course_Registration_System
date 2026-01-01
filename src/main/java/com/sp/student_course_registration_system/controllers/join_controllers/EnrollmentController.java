@@ -23,57 +23,29 @@ public class EnrollmentController {
     // Get all the Courses, a student has assigned into
     @GetMapping("/all-student-course/stuId={studentId}")
     ResponseEntity<?> getAllCoursesOfStudent(@PathVariable Long studentId){
-        try {
-           EnrollmentStudentResponse enrollmentStudentResponse = enrollmentService.findAllCourseOfStudent(studentId);
-
-           if (enrollmentStudentResponse.getCourseDtoList().isEmpty()){
-               return ResponseEntity.ok(new ApiResponse("This Student: " + enrollmentStudentResponse.getStudentName() + " has not joined to any courses"));
-           }
-
-           return ResponseEntity.ok(enrollmentStudentResponse);
-        } catch (Exception e){
-            System.out.println(e.getMessage());
-            return ResponseEntity.badRequest().body(new ApiResponse("Server Error while getting all the Courses of a student"));
-        }
+        EnrollmentStudentResponse enrollmentStudentResponse = enrollmentService.findAllCourseOfStudent(studentId);
+        return ResponseEntity.ok(enrollmentStudentResponse);
     }
 
     // Get all the Students of a specific Course, based on the passed in courseId
     @GetMapping("/all-course-student/couId={courseId}")
     ResponseEntity<?> getAllStudentsOfCourse(@PathVariable Long courseId){
-        try {
-           EnrollmentCourseResponse enrollmentCourseResponse = enrollmentService.findAllStudentOfCourse(courseId);
-
-           if (enrollmentCourseResponse.getStudentDtoSet().isEmpty()){
-               return ResponseEntity.ok(new ApiResponse("This Course: " + enrollmentCourseResponse.getCourseName() + " does not have any Students"));
-           }
-
-            return ResponseEntity.ok(enrollmentCourseResponse);
-        } catch (Exception e){
-            System.out.println(e.getMessage());
-            return ResponseEntity.badRequest().body(new ApiResponse("Server Error while getting all the Students of a course"));
-        }
+        EnrollmentCourseResponse enrollmentCourseResponse = enrollmentService.findAllStudentOfCourse(courseId);
+        return ResponseEntity.ok(enrollmentCourseResponse);
     }
 
     // Assign a Student to a Course
     @PostMapping("/student/assign-course")
-    ResponseEntity<?> assignStudentToCourse(@RequestBody EnrollmentRequest enrollmentRequest){
-        try {
-            boolean studentAddedToCourse = enrollmentService.addStudentToCourse(enrollmentRequest);
-
-            if (studentAddedToCourse){
-                return ResponseEntity.ok(new ApiResponse("The Student with the Student Id: " + enrollmentRequest.getStudentId() + " has been assigned to the Course with the Course Id: " + enrollmentRequest.getCourseId()));
-            }
-
-            return ResponseEntity.ok(new ApiResponse("Error assigning Student into a Course"));
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-            return ResponseEntity.badRequest().body(new ApiResponse("Server Error occurred while assigning a Student into a Course"));
-        }
+    public ResponseEntity<?> assignStudentToCourse(@RequestBody EnrollmentRequest enrollmentRequest){
+        enrollmentService.addStudentToCourse(enrollmentRequest);
+        return ResponseEntity.ok(new ApiResponse("The Student with the Student Id: " + enrollmentRequest.getStudentId() + " has been assigned to the Course with the Course Id: " + enrollmentRequest.getCourseId()));
     }
 
-    // Assign a course to a student
-
     // Remove a student from a course
+    @PutMapping("/student/remove-course")
+    public ResponseEntity<?> removeStudentFromCourse(@RequestBody EnrollmentRequest enrollmentRequest){
+        enrollmentService.removeStudentFromCourse(enrollmentRequest);
+        return ResponseEntity.ok(new ApiResponse("The Student with the StudentId: " + enrollmentRequest.getStudentId() + " has been removed from the Course with the CourseId: " + enrollmentRequest.getCourseId()));
+    }
 
-    // Remove a course from a student
 }

@@ -13,16 +13,12 @@ public interface EnrollmentService {
     EnrollmentCourseResponse findAllStudentOfCourse(Long courseId);
 
     // Assign a Student to a Course
-    boolean addStudentToCourse(EnrollmentRequest enrollmentRequest);
-
-    // Assign a course to a student
-    boolean addCourseToStudent(EnrollmentRequest enrollmentRequest);
+    void addStudentToCourse(EnrollmentRequest enrollmentRequest);
 
     // Remove a student from a course
-    boolean removeStudentFromCourse(EnrollmentRequest enrollmentRequest);
+    void removeStudentFromCourse(EnrollmentRequest enrollmentRequest);
 
-    // Remove a course from a student
-    boolean removeCourseFromStudent(EnrollmentRequest enrollmentRequest);
+
 
 
 }

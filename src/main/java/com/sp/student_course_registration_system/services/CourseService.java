@@ -17,11 +17,11 @@ public interface CourseService {
     CourseDto getCourseByCourseTitle(String courseTitle);
 
     // Add a new course into the system
-    boolean saveCourse(CourseRequest courseRequest);
+    void saveCourse(CourseRequest courseRequest);
 
     // Update an existing course in the system
-    boolean updateCourse(CourseDto courseDto);
+    void updateCourse(CourseDto courseDto);
 
     // Delete an existing course
-    boolean deleteCourse(Long courseId);
+    void deleteCourse(Long courseId);
 }
