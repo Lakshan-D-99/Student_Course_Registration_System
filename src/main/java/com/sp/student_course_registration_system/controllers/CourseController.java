@@ -60,6 +60,11 @@ public class CourseController {
     }
 
     // Update existing course
+    @PutMapping("/update-course")
+    ResponseEntity<?> updateExistingCourse(@RequestBody CourseDto courseDto){
+        courseService.updateCourse(courseDto);
+        return ResponseEntity.ok(new ApiResponse("The Course with the CourseId: " + courseDto.getId() + " has been updated"));
+    }
 
     // Delete existing course
     @DeleteMapping("/remove-course/couId={courseId}")

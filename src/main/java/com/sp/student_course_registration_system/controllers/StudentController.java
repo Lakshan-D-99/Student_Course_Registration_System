@@ -60,17 +60,18 @@ public class StudentController {
     }
 
     // Update existing StudentData
+    @PutMapping("/update-student")
+    ResponseEntity<?> updateExistingStudent(@RequestBody StudentDto studentDto){
+        studentService.updateStudent(studentDto);
+        return ResponseEntity.ok(new ApiResponse("The Student with the StudentId: " + studentDto.getId() + " has been updated"));
+    }
 
     // Delete existing student
     @DeleteMapping("/remove-student/stuId={studentId}")
     ResponseEntity<?> removeExistingStudent(@PathVariable Long studentId) {
-        try {
-            studentService.deleteStudent(studentId);
-            return ResponseEntity.ok(new ApiResponse("Student with the StudentId: " + studentId + " has been removed"));
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return ResponseEntity.badRequest().body(new ApiResponse("Server Error occurred while removing the Student with the StudentId: " + studentId));
-        }
+        studentService.deleteStudent(studentId);
+        return ResponseEntity.ok(new ApiResponse("Student with the StudentId: " + studentId + " has been removed"));
+
 
     }
 }
